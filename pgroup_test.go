@@ -41,15 +41,22 @@ func TestPGroup_Many(t *testing.T) {
 	interrupt := errors.New("interrupt")
 	var g run.PGroup
 	g.Add(func() error {
-		t.Logf("pos: %d", 2)
+		t.Log("runProc1")
 		return interrupt
-	}, func(error) {}, 2)
+	}, func(error) {
+		t.Log("stopProc1")
+	}, 2)
+
 	cancel := make(chan struct{})
 	g.Add(func() error {
-		t.Logf("pos: %d", 1)
+		t.Log("runProc2")
 		<-cancel
 		return nil
-	}, func(error) { close(cancel) }, 1)
+	}, func(error) {
+		t.Log("stopProc2")
+		close(cancel)
+	}, 1)
+
 	res := make(chan error)
 	go func() { res <- g.Run() }()
 	select {
