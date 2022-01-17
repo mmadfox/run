@@ -29,20 +29,20 @@ g.Add(func() error {
 	cancel()
 })
 
-OR run.PGroup
+OR run.PGroup with interrupt ordering
 
 var g run.PGroup
 g.Add(func() error {
     return myProcess(ctx, ...)
 }, func(error) {
     cancel()
-}, 1)
+}, 2)
 
 g.Add(func() error {
    return myProcess(ctx, ...)
 }, func(error) {
    cancel()
-}, 2) 
+}, 1) 
 ```
 
 ### net.Listener
