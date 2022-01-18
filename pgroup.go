@@ -12,8 +12,14 @@ type PGroup struct {
 // Add an actor (function) to the group. Each actor must be pre-emptable by an
 // interrupt function. That is, if interrupt is invoked, execute should return.
 // Also, it must be safe to call interrupt even after execute has returned.
+// Interrupt functions is invoked in the sort order.
 func (g *PGroup) Add(execute func() error, interrupt func(error), interruptOrder int) {
-	g.actors = append(g.actors, actor{execute: execute, interrupt: interrupt, pos: interruptOrder})
+	g.actors = append(g.actors, actor{
+		execute:        execute,
+		interrupt:      interrupt,
+		interruptOrder: interruptOrder,
+		index:          len(g.actors),
+	})
 }
 
 // Run all actors (functions) concurrently.
@@ -24,6 +30,10 @@ func (g *PGroup) Run() error {
 	if len(g.actors) == 0 {
 		return nil
 	}
+
+	sort.Slice(g.actors, func(i, j int) bool {
+		return g.actors[i].index < g.actors[j].index
+	})
 
 	errors := make(chan error, len(g.actors))
 	for _, a := range g.actors {
@@ -36,7 +46,7 @@ func (g *PGroup) Run() error {
 	err := <-errors
 
 	sort.Slice(g.actors, func(i, j int) bool {
-		return g.actors[i].pos < g.actors[j].pos
+		return g.actors[i].interruptOrder < g.actors[j].interruptOrder
 	})
 
 	// Signal all actors to stop.

@@ -57,7 +57,8 @@ func (g *Group) Run() error {
 }
 
 type actor struct {
-	execute   func() error
-	interrupt func(error)
-	pos       int
+	execute        func() error
+	interrupt      func(error)
+	interruptOrder int
+	index          int
 }

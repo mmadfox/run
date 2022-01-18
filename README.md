@@ -18,6 +18,23 @@ achieve well-defined lifecycle semantics for the group.
 
 ## Examples
 
+### Interrupt order
+```go
+var g run.PGroup 
+
+g.Add(func () error {
+   return myProcess(ctx, ...)
+}, func (error) {
+   cancel()
+}, 2)
+
+g.Add(func() error {
+   return myProcess(ctx, ...)
+}, func(error) {
+   cancel()
+}, 1)
+```
+
 ### context.Context
 
 ```go
