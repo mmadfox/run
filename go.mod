@@ -1,3 +1,3 @@
-module github.com/oklog/run
+module github.com/mmadfox/run
 
-go 1.13
+go 1.17
